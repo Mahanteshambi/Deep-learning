@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jan 11 12:17:29 2020
-
 @author: Ambi
 """
 
@@ -65,10 +63,13 @@ class FeatureExtraction:
             print('Test accuracy:', score[1])
             
     def extract_dump_features(self):
+        
+        # As model is of 8 layers, then we need to extract neuron values from
+        # 7th layer
         layeredOutput = K.function([self.model.layers[0].input],
                                       [self.model.layers[6].output])
         chunkSize = 5000
-        outputDir = './output/features/'
+        outputDir = './output/cnn_features/'
         if not os.path.exists(outputDir):
             os.makedirs(outputDir)
 
@@ -83,7 +84,7 @@ class FeatureExtraction:
             featureDataList = list()
             isWriteComplete = False
             for idx in range(len(data)):
-                x = [self.x_train[idx]]
+                x = [data[idx]]
                 featureVector =  layeredOutput([x])[0]
                 dataList = [idx, datalabels[idx].tolist(), (data[idx] * 255.0).tolist(), featureVector.tolist()[0]]
                 #print(dataList)
@@ -113,5 +114,9 @@ if __name__ == "__main__":
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
     featureExtraction = FeatureExtraction(x_train, y_train, x_test, y_test)
+    
+    # Train CNN model to understand MNIST dataset features for classifications.
     featureExtraction.train(batch_size, epochs)
+    
+    # Extract features from CNN model for clustering purpose
     featureExtraction.extract_dump_features()

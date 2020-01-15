@@ -8,12 +8,15 @@ from os import listdir
 from os.path import isfile, join
 import pandas as pd
 import numpy as np
-from sklearn.cluster import KMeans
+from KMeansClustering import KMeansClustering
+from DBScanClustering import DBScanClustering
+from AgglomerativeClustering import AgglomerativeClusterings
 import matplotlib.pyplot as plt
-import random, time
+import time
+from sklearn.decomposition import PCA
 
 
-kMeansOPDir = 'output/kmeans/'
+
 
 def getFeatureVectors(dir):
     featureFiles = [join(dir, file) for file in listdir(dir) if isfile(join(dir, file))]
@@ -46,7 +49,17 @@ def getFeatureVectors(dir):
         labelList[i] = [float(value) for value in labelList[i]]
     return labelList, characterDataList, featureVectorList
 
+def visualize(labelList, featureVectorList):
+    pca = PCA(n_components=2)
+    principalComponents = pca.fit_transform(featureVectorList)
     
+    labels = []
+    for l in range(len(labelList)):
+      labels.append(labelList[l].index(1.0))
+    
+    plt.scatter(principalComponents[:, 0], principalComponents[:, 1], alpha=0.7, c=labels, cmap='viridis_r')
+    plt.xlabel('MNIST images x dim')
+    plt.ylabel('MNIST images y dim');   
 
     
 def evaluateKMeans(clusterData):
@@ -64,73 +77,11 @@ def evaluateKMeans(clusterData):
 
 
 
-class KMeansClustering:
-    
-    def __init__(self, featureVectorList, labels):
-        self.featureVectorList = featureVectorList
-        self.labels = labels
-        
-    def fitAndPredict(self):
-        startTime = time.time()
-        k = 10
-        kmeans = KMeans(n_clusters=k)
-        kmeans = kmeans.fit(featureVectorList)
-        self.kMeanslabels = kmeans.predict(featureVectorList)
-        print("Clustered using KMeans in [%.3f seconds]" % (time.time() - startTime))
-        self.kMeanscentroids = kmeans.cluster_centers_
-      
-    def findOptimalK(self):
-        wcss = list()
-        for k in range(1, 15):
-            kmeans = KMeans(n_clusters=k)
-            kmeans = kmeans.fit(featureVectorList)
-            wcss.append(kmeans.inertia_)
-            
-        plt.figure(figsize=(15, 6))
-        plt.plot(range(1, 15), wcss, marker = "o")
-        
-    def dumpResults(self):
-        clusterData = []
-        for i in range(10):
-            clusterData.append([])
-        for i in range(len(self.kMeanslabels)):
-            clusterData[self.kMeanslabels[i]].append([characterDataList[i], labelList[i]])
-            
-        for l in range(0):
-            print("Plotting for label %d" % (l))
-            fig, axes = plt.subplots(nrows=10, ncols=10, sharex=True)
-            fig.set_figheight(15)
-            fig.set_figwidth(15)
-            count = 0
-            randomNoList = random.sample(range(0, len(clusterData[l])), 100)
-            for i in range(10):
-                for j in range(10):
-                    axes[i][j].imshow(clusterData[l][randomNoList[count]][0])
-                    count += 1
-            fig.savefig(kMeansOPDir + 'kmeans_cluster' + str(l) + '.png')
-        return clusterData
-    
-class AgglomerativeClustering():
-    
-    def __init__(self, featureVectorList, labels):
-        self.featureVectorList = featureVectorList
-        self.labels = labels
-        
-    def fitAndPredict(self):
-        startTime = time.time()
-        k = 10
-        kmeans = KMeans(n_clusters=k)
-        kmeans = kmeans.fit(featureVectorList)
-        self.kMeanslabels = kmeans.predict(featureVectorList)
-        print("Clustered using KMeans in [%.3f seconds]" % (time.time() - startTime))
-        self.kMeanscentroids = kmeans.cluster_centers_
-
-#if __name__ == "__main__":
 startTime = time.time()
-labelList, characterDataList, featureVectorList = getFeatureVectors('output/colab_features/')
+labelList, characterDataList, featureVectorList = getFeatureVectors('output/cnn_features/')
 print("Extracted details in [%.3f seconds]" % (time.time() - startTime))
 
-kMeansObj = KMeansClustering(featureVectorList, labelList)
+kMeansObj = KMeansClustering(featureVectorList, labelList, characterDataList)
 kMeansObj.findOptimalK()
 kMeansObj.fitAndPredict()
 
@@ -139,7 +90,14 @@ startTime = time.time()
 clusterData = kMeansObj.dumpResults()
 print("Dumped results in [%.3f seconds]" % (time.time() - startTime))
 evaluateKMeans(clusterData)
-    
+#visualize(labelList, featureVectorList)
+
+#dbScanClustering = DBScanClustering(featureVectorList, labelList)
+#dbScanClustering.fitAndPredict()
+
+#agglomerativeClustering = AgglomerativeClusterings(featureVectorList, labelList)
+#agglomerativeClustering.fitAndPredict()
+
 
     
 
