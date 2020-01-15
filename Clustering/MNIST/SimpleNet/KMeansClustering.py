@@ -6,8 +6,10 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import time, os, random
 
-kMeansOPDir = 'output/kmeans/'
+
 class KMeansClustering:
+    
+    kMeansOPDir = 'output/kmeans/'    
     
     def __init__(self, featureVectorList, labels, characterDataList):
         self.featureVectorList = featureVectorList
@@ -40,8 +42,8 @@ class KMeansClustering:
         for i in range(len(self.kMeanslabels)):
             clusterData[self.kMeanslabels[i]].append([self.characterDataList[i], self.labels[i]])
             
-        if not os.path.exists(kMeansOPDir):
-            os.makedirs(kMeansOPDir)
+        if not os.path.exists(self.kMeansOPDir):
+            os.makedirs(self.kMeansOPDir)
             
         for l in range(10):
             print("Plotting for label %d" % (l))
@@ -54,5 +56,5 @@ class KMeansClustering:
                 for j in range(10):
                     axes[i][j].imshow(clusterData[l][randomNoList[count]][0])
                     count += 1
-            fig.savefig(kMeansOPDir + 'kmeans_cluster' + str(l) + '.png')
+            fig.savefig(self.kMeansOPDir + 'kmeans_cluster' + str(l) + '.png')
         return clusterData

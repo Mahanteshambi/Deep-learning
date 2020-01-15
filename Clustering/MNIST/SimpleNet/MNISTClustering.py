@@ -49,7 +49,7 @@ def getFeatureVectors(dir):
         labelList[i] = [float(value) for value in labelList[i]]
     return labelList, characterDataList, featureVectorList
 
-def visualize(labelList, featureVectorList):
+def visualize(labelList, featureVectorList, outputDir):
     pca = PCA(n_components=2)
     principalComponents = pca.fit_transform(featureVectorList)
     
@@ -59,7 +59,8 @@ def visualize(labelList, featureVectorList):
     
     plt.scatter(principalComponents[:, 0], principalComponents[:, 1], alpha=0.7, c=labels, cmap='viridis_r')
     plt.xlabel('MNIST images x dim')
-    plt.ylabel('MNIST images y dim');   
+    plt.ylabel('MNIST images y dim'); 
+    plt.savefig(outputDir + 'MNIST_clusters_pca.png')
 
     
 def evaluateKMeans(clusterData):
@@ -90,7 +91,7 @@ startTime = time.time()
 clusterData = kMeansObj.dumpResults()
 print("Dumped results in [%.3f seconds]" % (time.time() - startTime))
 evaluateKMeans(clusterData)
-#visualize(labelList, featureVectorList)
+visualize(labelList, featureVectorList, kMeansObj.kMeansOPDir)
 
 #dbScanClustering = DBScanClustering(featureVectorList, labelList)
 #dbScanClustering.fitAndPredict()
